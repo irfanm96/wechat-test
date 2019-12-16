@@ -1,190 +1,188 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
-import 'package:wechat/wechat.dart';
+import 'package:flutter/material.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
 
-void main() => runApp(MyApp());
+import 'send_auth.dart';
+/*
+import 'launch_mini_program_page.dart';
+
+import 'subscribe_message_page.dart';
+import 'auth_by_qr_code_page.dart';
+import 'pay_page.dart';
+import 'share_image_page.dart';
+import 'share_mini_program.dart';
+import 'share_music.dart';
+import 'share_text_image.dart';
+import 'share_video_page.dart';
+import 'share_web_page.dart';
+import 'sign_auto_deduct_page.dart';
+*/
+
+void main() => runApp(new MyApp());
 
 class MyApp extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  _MyAppState createState() => new _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  String _result = 'no result';
-
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-    Wechat.register('wx52be4f5f1e383173');
-    _result = 'no result';
-    print('inited');
+    _initFluwx();
+  }
+
+  _initFluwx() async {
+    await fluwx.registerWxApi(
+        appId: "wx52be4f5f1e383173",
+        doOnAndroid: true,
+        doOnIOS: true,
+        universalLink: "https://your.univerallink.com/link/");
+    var result = await fluwx.isWeChatInstalled();
+    print("is installed $result");
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    try {
-      platformVersion = await Wechat.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
-
-  void _share (arguments) async {
-    try {
-      var result = await Wechat.share(arguments);
-      _result = result.toString() ?? 'null result';
-    } catch (e) {
-      _result = e.toString();
-    }
-  }
-
-  void _shareText ([String to = 'session']) async {
-    var arguments = {
-      'to': to,
-      'text': 'Welcome to user flutter wechat plugin.'
-    };
-    await _share(arguments);
-  }
-
-  void _shareImage ([String to = 'session']) async {
-    _share({
-      'kind': 'image',
-      'to': to,
-      'resourceUrl': 'https://files.onmr.com/wild/2018/09/3177628278.jpg',
-      'url': 'https://wild.onmr.com/trails',
-      'title': '荒僧',
-      'description': '大丈夫当朝游碧海而暮苍梧'
-    });
-  }
-
-  void _shareMusic ([String to = 'session']) async {
-    _share({
-      'kind': 'music',
-      'to': to,
-      'resourceUrl': 'https://pantao.onmr.com/usr/uploads/2018/12/2839345471.mp3',
-      'url': 'https://pantao.onmr.com/demo-files',
-      'coverUrl': 'https://pantao.onmr.com/usr/uploads/2018/12/2293691504.jpg',
-      'title': 'Jingle Bells',
-      'description': 'Children\'s Christmas Favorites-Jingle Bells (Album Version)'
-    });
-  }
-
-  void _shareWebpage ([String to = 'session']) async {
-    _share({
-      'kind': 'webpage',
-      'to': to,
-      'url': 'https://pantao.onmr.com/demo-files',
-      'coverUrl': 'https://pantao.onmr.com/usr/uploads/2018/12/2293691504.jpg',
-      'title': 'Jingle Bells',
-      'description': 'Children\'s Christmas Favorites-Jingle Bells (Album Version)'
-    });
-  }
-
-  void _login () async {
-
-    print('trying to login');
-
-    var result = await Wechat.login({
-      'scope': 'snsapi_userinfo',
-      'state': 'wechat_sdk_demo_test'
-    }).then((d){
-
-      print('---------');
-      print(d);
-      print('---------EOL----');
-
-
-    });
-
-    _result = result.toString();
-    print(_result);
-
-  }
-
-  void _openWechat () async {
-    var result = await Wechat.openWechat();
-  }
+  Future<void> initPlatformState() async {}
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Wechat Plugin App'),
-        ),
-        body: ListView(
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.system_update),
-              title: Text('Running on: $_platformVersion\n'),
-            ),
-            ListTile(
-              leading: Icon(Icons.text_format),
-              title: Text('Share text to wechat'),
-              onTap: () {
-                _shareText();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.text_format),
-              title: Text('Share text to wechat timeline'),
-              onTap: () {
-                _shareText('timeline');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.image),
-              title: Text('Share image to wechat'),
-              onTap: () {
-                _shareImage();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.music_note),
-              title: Text('Share music to wechat'),
-              onTap: () {
-                _shareMusic();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.web),
-              title: Text('Share webpage to wechat'),
-              onTap: () {
-                _shareWebpage();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Login via wechat'),
-              onTap: () {
-                _login();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Open Wechat'),
-              onTap: () {
-                _openWechat();
-              },
-            ),
-            Text('result: $_result')
-          ],
-        ),
+    return new MaterialApp(
+      routes: <String, WidgetBuilder>{
+//        "shareText": (context) => ShareTextPage(),
+//        "shareImage": (context) => ShareImagePage(),
+//        "shareWebPage": (context) => ShareWebPagePage(),
+//        "shareMusic": (context) => ShareMusicPage(),
+//        "shareVideo": (context) => ShareVideoPage(),
+        "sendAuth": (context) => SendAuthPage(),
+//        "shareMiniProgram": (context) => ShareMiniProgramPage(),
+//        "pay": (context) => PayPage(),
+//        "launchMiniProgram": (context) => LaunchMiniProgramPage(),
+//        "subscribeMessage": (ctx) => SubscribeMessagePage(),
+//        "AuthByQRCode": (ctx) => AuthByQRCodePage(),
+//        'AutoDeduct': (ctx) => SignAutoDeductPage(),
+      },
+      home: new Scaffold(
+          appBar: new AppBar(
+            title: const Text('Plugin example app'),
+          ),
+          body: ShareSelectorPage()),
+    );
+  }
+}
+
+class ShareSelectorPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: new ListView(
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareText");
+                },
+                child: const Text("share text")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareImage");
+                },
+                child: const Text("share image")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareWebPage");
+                },
+                child: const Text("share webpage")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareMusic");
+                },
+                child: const Text("share music")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareVideo");
+                },
+                child: const Text("share video")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("shareMiniProgram");
+                },
+                child: const Text("share mini program")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("sendAuth");
+                },
+                child: const Text("send auth")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("pay");
+                },
+                child: const Text("pay")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("launchMiniProgram");
+                },
+                child: const Text("Launch MiniProgram")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("subscribeMessage");
+                },
+                child: const Text("SubscribeMessage")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("AuthByQRCode");
+                },
+                child: const Text("AuthByQRCode")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed("AutoDeduct");
+                },
+                child: const Text("SignAuto-deduct")),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: new OutlineButton(
+                onPressed: () {
+                  fluwx.openWeChatApp();
+                },
+                child: const Text("Open WeChat App")),
+          ),
+        ],
       ),
     );
   }
