@@ -19,7 +19,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    Wechat.register('wxddeb6bbecaec01240');
+    Wechat.register('wx52be4f5f1e383173');
     _result = 'no result';
     print('inited');
   }
@@ -96,11 +96,24 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _login () async {
-    var result = await  Wechat.login({
+
+    print('trying to login');
+
+    var result = await Wechat.login({
       'scope': 'snsapi_userinfo',
-      'state': 'customstate'
+      'state': 'wechat_sdk_demo_test'
+    }).then((d){
+
+      print('---------');
+      print(d);
+      print('---------EOL----');
+
+
     });
+
     _result = result.toString();
+    print(_result);
+
   }
 
   void _openWechat () async {
